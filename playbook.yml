@@ -1,0 +1,19 @@
+---
+- name: Install nginx
+  hosts: all
+  become: yes
+
+  vars:
+    source_file: ./index.html
+    destin_path: /var/www/html
+
+  tasks:
+  - name: install
+    apt: name=nginx state=latest
+  - name: copy page
+    copy: src={{ source_file }} dest={{ destin_path }} mode=0555
+  - name: start
+    service: 
+      name=nginx
+      state=started
+      enabled=yes

@@ -1,0 +1,20 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: apache_server
+  labels:
+    app: crush-course
+spec:
+  selector:
+    matchLabels:
+      project: web
+  template:
+    metadata:
+      labels:
+        project: web
+    spec:
+      containers: 
+      - name: web
+        image: apache_server:latest
+        ports:
+          - containerPort: 80

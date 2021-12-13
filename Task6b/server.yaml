@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  AMI:
+    Type: String
+    Default: ami-0245697ee3e07e755
+    Description: Debian
+  KeyPairName: 
+    Type: String
+    Default: ssh_key
+    Description: Existing EC2 SSH key pair name
+Resources:
+  EC2NginxInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: eu-west-1
+      ImageId: !Ref AMI
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPairName
+       
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt-get -y update
+            sudo apt-get -y install nginx
+            cd /var/www
+            chgrp ec2-user html
+            chown ec2-user html
+            cd html
+            cat <<EOF > index.html
+            <!DOCTYPE html>
+            <html>
+            <body>
+            <h1>Hello world from Crash course DevOps!</h1>
+            </body>
+            </html>
+            EOF
+            sudo systemctl start nginx
+      SecurityGroups:
+        - !Ref NginxSecurityGroup
+  
+  NginxSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: NginxSG
+
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          ToPort: 80 
+
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 22
+          ToPort: 22 
